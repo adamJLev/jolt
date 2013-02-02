@@ -82,6 +82,47 @@ Array.prototype.some = Array.prototype.some || function(fun /*, thisp */) {
   return false;
 };
 
+/** 
+ * https://developer.mozilla.org/en/JavaScript/Reference/Global_Objects/Array/indexOf
+ */
+Array.prototype.indexOf = Array.prototype.indexOf || function (searchElement) {
+  if (this === void 0 || this === null) {
+    throw new TypeError();
+  }
+  
+  var t = Object(this);
+  var len = t.length >>> 0;
+  
+  if (len === 0) {
+    return -1;
+  }
+  
+  var n = 0;
+  
+  if (arguments.length > 0) {
+    n = Number(arguments[1]);
+    if (n !== n) { // shortcut for verifying if it's NaN
+      n = 0;
+    } else if (n !== 0 && n !== Infinity && n !== -Infinity) {
+      n = (n > 0 || -1) * Math.floor(Math.abs(n));
+    }
+  }
+  
+  if (n >= len) {
+    return -1;
+  }
+  
+  var k = n >= 0 ? n : Math.max(len - Math.abs(n), 0);
+  
+  for (; k < len; k++) {
+    if (k in t && t[k] === searchElement) {
+      return k;
+    }
+  }
+  
+  return -1;
+};
+
 /**
  * Idea taken from 
  *   http://www.prototypejs.org/api/enumerable/pluck
@@ -145,9 +186,7 @@ Array.prototype.bisect = function(obj, compareKey, caseInsensitive) {
       needle = compareKey ? obj[compareKey] : obj,
       lo = 0,
       mid,
-      //mid = floor((lo + hi) / 2),
       hi = this.length,
-      //hi = this.length - 1,
       val = caseInsensitive 
           ? function(x) { return typeof(x) === 'string' ? x.toLowerCase() : x; }
           : function(x) { return x; }; 
@@ -179,8 +218,9 @@ Array.prototype.insort = function(obj, compareKey, caseInsensitive, noDupes) {
     var index = this.bisect(obj, compareKey, caseInsensitive),
         item = this[index];
     
-    if ((compareKey ? this[index][compareKey] : this[index]) == (compareKey ? obj[compareKey] : obj)) 
+    if ((compareKey ? this[index][compareKey] : this[index]) == (compareKey ? obj[compareKey] : obj)) {
       return;
+    }
     
     this.splice(this.bisect(obj, compareKey, caseInsensitive), 0, obj);
   }
@@ -207,9 +247,9 @@ Array.prototype.selectIndex = function(iterator) {
 Array.prototype.shuffle = function() {
   var j, tmp;
   for (var i = 1; i < this.length; i++) {
-    j = Math.floor(Math.random() * (1 + i));  // choose j in [0..i]
+    j = Math.floor(Math.random() * (1 + i)); // choose j in [0..i]
     if (j != i) {
-      tmp = this[i];                        // swap list[i] and list[j]
+      tmp = this[i]; // swap list[i] and list[j]
       this[i] = this[j];
       this[j] = tmp;
     }
@@ -252,44 +292,3 @@ Array.prototype.unique = function(ensureNumeric) {
   
   return ret;
 };
-
-/** 
- * https://developer.mozilla.org/en/JavaScript/Reference/Global_Objects/Array/indexOf
- */
-Array.prototype.indexOf = Array.prototype.indexOf || function (searchElement) {
-  if (this === void 0 || this === null) {
-    throw new TypeError();
-  }
-  
-  var t = Object(this);
-  var len = t.length >>> 0;
-  
-  if (len === 0) {
-    return -1;
-  }
-  
-  var n = 0;
-  
-  if (arguments.length > 0) {
-    n = Number(arguments[1]);
-    if (n !== n) { // shortcut for verifying if it's NaN
-      n = 0;
-    } else if (n !== 0 && n !== Infinity && n !== -Infinity) {
-      n = (n > 0 || -1) * Math.floor(Math.abs(n));
-    }
-  }
-  
-  if (n >= len) {
-    return -1;
-  }
-  
-  var k = n >= 0 ? n : Math.max(len - Math.abs(n), 0);
-  
-  for (; k < len; k++) {
-    if (k in t && t[k] === searchElement) {
-      return k;
-    }
-  }
-  
-  return -1;
-}

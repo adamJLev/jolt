@@ -123,29 +123,28 @@ Function.prototype.pollFor = function(pollFn, pollingInterval) {
  * @param execAsap
  */
 Function.prototype.debounce = function (threshold, execAsap) {
-  var func = this, // reference to original function
-      timeout; // handle to setTimeout async task (detection period)
-  // return the new debounced function which executes the original function only once
-  // until the detection period expires
-  return function debounced() {
-    var obj = this, // reference to original context object
-        args = arguments; // arguments at execution time
-    // this is the detection function. it will be executed if/when the threshold expires
+  var fn = this,
+      timeout;
+  
+  return function() {
+    var obj = this,
+        args = arguments;
+    
     function delayed() {
-      // if we're executing at the end of the detection period
-      if (!execAsap)
-        func.apply(obj, args); // execute now
-      // clear timeout handle
+      if (!execAsap) {
+        fn.apply(obj, args);
+      } 
       timeout = null;
     }
 
-    // stop any current detection period
-    if (timeout)
+    if (timeout) {
       clearTimeout(timeout);
-    // otherwise, if we're not already waiting and we're executing at the beginning of the waiting period
-    else if (execAsap)
-      func.apply(obj, args); // execute now
-    // reset the waiting period
+    }
+    else if (execAsap) {
+      fn.apply(obj, args);
+    }
+      
+    // Reset the waiting period
     timeout = setTimeout(delayed, threshold || 100);
   };
 };
